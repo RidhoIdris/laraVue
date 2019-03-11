@@ -24,6 +24,14 @@ Vue.use(VueProgressBar, {
   height: '2px'
 })
 
+import swal from 'sweetalert'
+window.swal = swal;
+
+import izitoast from 'izitoast'
+window.izitoast = izitoast;
+
+window.Fire = new Vue();
+
 import moment from 'moment'
 let routes = [
     { path: '/dashboard', component: require('./components/Dashboard.vue').default },

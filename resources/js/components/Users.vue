@@ -122,12 +122,34 @@
             },
             createUser(){
                 this.$Progress.start();
-                this.form.post('api/user');
-                this.$Progress.finish();
+                this.form.post('api/user')
+                .then(()=>{
+                    Fire.$emit('AfterCreated');
+                    $('#addModal').modal('hide');
+                    izitoast.show({
+                        title: 'Success',
+                        message: 'User Created!',
+                        color: 'green',
+                        position: 'topRight'
+                    });
+                    this.$Progress.finish();
+                })
+                .catch(()=>{
+                    izitoast.show({
+                        title: 'Error',
+                        message: 'Something Error!',
+                        color: 'red',
+                        position: 'topRight'
+                    });
+                    this.$Progress.fail();
+                })
             }
         },
         created() {
            this.loadUsers();
+           Fire.$on('AfterCreated', () => {
+               this.loadUsers();
+           });
         }
     }
 </script>
