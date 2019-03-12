@@ -24,7 +24,7 @@ Vue.use(VueProgressBar, {
   height: '2px'
 })
 
-import swal from 'sweetalert'
+import swal from 'sweetalert2'
 window.swal = swal;
 
 import izitoast from 'izitoast'
