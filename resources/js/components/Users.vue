@@ -177,7 +177,7 @@
                                     );
                                     this.$Progress.finish();
                                 }).catch(()=>{
-                                    Swal.fire({
+                                    swal.fire({
                                         type: 'error',
                                         title: 'Oops...',
                                         text: 'Something went wrong!'

@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
+
+
     public function index()
     {
         return User::latest()->paginate('10');
@@ -57,13 +59,42 @@ class UserController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    public function profile()
+    {
+        return auth('api')->user();
+    }
+    public function updateProfile(Request $request)
+    {
+        $user = auth('api')->user();
+
+        $this->validate($request,[
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'password' => 'sometimes|required|string|max:255|min:8',
+            'bio' => 'max:255',
+            'type' => 'required|string|max:255'
+        ]);
+
+        $currentPhoto = $user->photo;
+        if ($request->photo != $currentPhoto) {
+           $name = time().'.'.explode('/',explode(':',substr($request->photo,0,strpos($request->photo,';')))[1])[1];
+           \Image::make($request->photo)->save(public_path('images/profile/').$name);
+
+           $request->merge(['photo' => $name]);
+           $userPhoto = public_path('images/profile/').$currentPhoto;
+            if (file_exists($userPhoto)) {
+                @unlink($userPhoto);
+            }
+        }
+        if (!empty($request->password)) {
+            $request->merge(['password' => Hash::make($request->password)]);
+        }
+        $user->update($request->all());
+        return ['message' => 'Update Profile Success'];
+
+    }
+
+
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -71,11 +102,13 @@ class UserController extends Controller
         $this->validate($request,[
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
-            'password' => 'sometimes|string|max:255|min:8',
+            'password' => 'sometimes|required|string|max:255|min:8',
             'bio' => 'max:255',
             'type' => 'required|string|max:255'
         ]);
-
+        if (!empty($request->password)) {
+            $request->merge(['password' => Hash::make($request->password)]);
+        }
         $user->update($request->all());
 
         return ['message'=> 'user Updateted'];
